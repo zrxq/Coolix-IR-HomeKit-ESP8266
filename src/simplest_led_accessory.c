@@ -105,4 +105,5 @@ homekit_server_config_t config = {
 };
 
 void accessory_init() {
+	ac_off(); // Power off the unit upon startup to sync states.
 }
