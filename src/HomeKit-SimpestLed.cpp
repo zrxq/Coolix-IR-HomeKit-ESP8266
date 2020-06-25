@@ -15,7 +15,12 @@
 #include <ESP8266WiFi.h>
 
 #include <arduino_homekit_server.h>
-#include "wifi.h"
+#include "wifi.h" // Just create an empty file (or put your ssid and password there)
+
+#ifndef APN_SETTINGS 
+const char *ssid = "apn name";
+const char *password = "apn password";
+#endif
 
 #define PL(s) Serial.println(s)
 #define P(s) Serial.print(s)
@@ -25,11 +30,6 @@
 //D4  2 //led
 
 #define PIN_LED D0
-
-#ifndef APN_SETTINGS 
-const char *ssid = "apn name";
-const char *password = "apn password";
-#endif
 
 void builtinledSetStatus(bool on);
 
