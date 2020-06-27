@@ -38,10 +38,18 @@ void ac_active_set(homekit_value_t value) {
 void on_update();
 void on_fan_update();
 
+extern float temperature;
+
+
+homekit_value_t get_temperature() {
+	return HOMEKIT_FLOAT(temperature);
+}
+
+
 homekit_characteristic_t ch_ac_name = HOMEKIT_CHARACTERISTIC_(NAME, ACCESSORY_NAME);
 homekit_characteristic_t serial_number = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, ACCESSORY_SN);
 homekit_characteristic_t ac_active = HOMEKIT_CHARACTERISTIC_(ACTIVE, 0, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_update));
-homekit_characteristic_t cha_temperature = HOMEKIT_CHARACTERISTIC_(CURRENT_TEMPERATURE, 25.f);
+homekit_characteristic_t ch_temperature = HOMEKIT_CHARACTERISTIC_(CURRENT_TEMPERATURE, 0, .getter=get_temperature);
 homekit_characteristic_t cha_current_hc_state = HOMEKIT_CHARACTERISTIC_(CURRENT_HEATER_COOLER_STATE, 3);
 homekit_characteristic_t cha_target_hc_state = HOMEKIT_CHARACTERISTIC_(TARGET_HEATER_COOLER_STATE, 2, .valid_values={.count=1, .values=(uint8_t[]) {2}}, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_update));
 homekit_characteristic_t cooling_threshold = HOMEKIT_CHARACTERISTIC_(
@@ -111,7 +119,7 @@ homekit_accessory_t *accessories[] =
 						  .characteristics=(homekit_characteristic_t*[]){
 						    HOMEKIT_CHARACTERISTIC(NAME, "Кондиционер"),
 						    &ac_active,
-							&cha_temperature,
+							&ch_temperature,
 							&cha_current_hc_state,
 							&cha_target_hc_state,
 							&cooling_threshold,

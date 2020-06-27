@@ -13,6 +13,7 @@
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <DallasTemperature.h>
 
 #include <arduino_homekit_server.h>
 #include "wifi.h" // Just create an empty file (or put your ssid and password there)
@@ -30,6 +31,10 @@ const char *password = "apn password";
 //D4  2 //led
 
 #define PIN_LED D0
+
+OneWire oneWire(D3);
+DallasTemperature temp_sensor(&oneWire);
+float temperature = 0.f;
 
 void builtinledSetStatus(bool on);
 
@@ -88,7 +93,14 @@ void setup() {
   blink_led(200, 3);
 }
 
+void update_temp() {
+  temp_sensor.requestTemperatures();
+  temperature = temp_sensor.getTempCByIndex(0);
+}
+
+
 void loop() {
+  update_temp();
   homekit_loop();
   delay(5);
 }
