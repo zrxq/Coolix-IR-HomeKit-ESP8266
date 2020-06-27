@@ -40,8 +40,14 @@ extern "C" void ac_setup() {
 extern "C" void ac_on(float temp, float fan_speed_pc) {
   Serial.println("Turning ON");
   ac.on();
+  ac.setMode(kCoolixCool);
   ac.setTemp((int)temp);  
   ac.send();
+}
+
+extern "C" void fan_on() {
+  ac.on();
+  ac.setMode(kCoolixFan);  
   ac.setFan(kCoolixFanMax);
   ac.send();
 }

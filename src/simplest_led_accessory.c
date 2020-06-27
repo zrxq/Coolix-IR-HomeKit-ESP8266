@@ -36,26 +36,48 @@ void ac_active_set(homekit_value_t value) {
 }
 
 void on_update();
+void on_fan_update();
 
-homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, ACCESSORY_NAME);
+homekit_characteristic_t ch_ac_name = HOMEKIT_CHARACTERISTIC_(NAME, ACCESSORY_NAME);
 homekit_characteristic_t serial_number = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, ACCESSORY_SN);
 homekit_characteristic_t ac_active = HOMEKIT_CHARACTERISTIC_(ACTIVE, 0, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_update));
-homekit_characteristic_t cha_temperature = HOMEKIT_CHARACTERISTIC_(CURRENT_TEMPERATURE, 25.f, .min_value=(float_t[]) {17.f}, .max_value=(float_t[]) {30.f}, .min_step=(float_t[]) {1.f});
+homekit_characteristic_t cha_temperature = HOMEKIT_CHARACTERISTIC_(CURRENT_TEMPERATURE, 25.f);
 homekit_characteristic_t cha_current_hc_state = HOMEKIT_CHARACTERISTIC_(CURRENT_HEATER_COOLER_STATE, 3);
 homekit_characteristic_t cha_target_hc_state = HOMEKIT_CHARACTERISTIC_(TARGET_HEATER_COOLER_STATE, 2, .valid_values={.count=1, .values=(uint8_t[]) {2}}, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_update));
 homekit_characteristic_t cooling_threshold = HOMEKIT_CHARACTERISTIC_(
     COOLING_THRESHOLD_TEMPERATURE, 17.f, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_update)
 );
 
+// fan
+homekit_characteristic_t ch_fan_active = HOMEKIT_CHARACTERISTIC_(ACTIVE, 0, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_fan_update));
+
 extern void ac_on(float temp);
 extern void ac_off();
+extern void fan_on();
 
 void on_update() {
 	printf("-- on_update()\n");
-	if (ac_active.value.uint8_value == 0) {
+	if (ac_active.value.uint8_value == 0 && ch_fan_active.value.uint8_value == 0) {
+		printf("Both cooler and fan are off, turning off the unit.\n");
 		ac_off();
 	} else {
+		printf("Turning on the cooler (and turning off the fan).\n");
 		ac_on(cooling_threshold.value.float_value);
+		ch_fan_active.value.uint8_value = 0;
+		homekit_characteristic_notify(&ch_fan_active, ch_fan_active.value);
+	}
+}
+
+void on_fan_update() {
+	printf("-- on_fan_update()\n");
+	if (ch_fan_active.value.uint8_value == 0 && cha_current_hc_state.value.uint8_value == 0) {
+		printf("Both fan and cooler are off, turning off the unit.\n");
+		ac_off();
+	} else {
+		printf("Turning on the fan (and turning off the cooler).\n");
+		fan_on();
+		cha_current_hc_state.value.uint8_value = 0;
+		homekit_characteristic_notify(&cha_current_hc_state, cha_current_hc_state.value);
 	}
 }
 
@@ -77,7 +99,7 @@ homekit_accessory_t *accessories[] =
 						.services=(homekit_service_t*[]){
 						  HOMEKIT_SERVICE(ACCESSORY_INFORMATION,
 						  .characteristics=(homekit_characteristic_t*[]){
-						    &name,
+						    &ch_ac_name,
 						    HOMEKIT_CHARACTERISTIC(MANUFACTURER, ACCESSORY_MANUFACTURER),
 						    &serial_number,
 						    HOMEKIT_CHARACTERISTIC(MODEL, ACCESSORY_MODEL),
@@ -87,11 +109,18 @@ homekit_accessory_t *accessories[] =
 						  }),
 						  HOMEKIT_SERVICE(HEATER_COOLER, .primary=true,
 						  .characteristics=(homekit_characteristic_t*[]){
+						    HOMEKIT_CHARACTERISTIC(NAME, "Кондиционер"),
 						    &ac_active,
 							&cha_temperature,
 							&cha_current_hc_state,
 							&cha_target_hc_state,
 							&cooling_threshold,
+						    NULL
+						  }),
+						  HOMEKIT_SERVICE(FAN, .primary=false,
+						  .characteristics=(homekit_characteristic_t*[]){
+							HOMEKIT_CHARACTERISTIC(NAME, "Проветривание"),
+						    &ch_fan_active,
 						    NULL
 						  }),
 						  NULL

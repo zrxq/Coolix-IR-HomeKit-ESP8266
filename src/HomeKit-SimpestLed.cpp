@@ -103,7 +103,7 @@ void builtinledSetStatus(bool on) {
 //==============================
 
 extern "C" homekit_server_config_t config;
-extern "C" homekit_characteristic_t name;
+extern "C" homekit_characteristic_t ch_ac_name;
 extern "C" void led_toggle();
 extern "C" void accessory_init();
 
@@ -113,10 +113,10 @@ void homekit_setup() {
   accessory_init();
   uint8_t mac[WL_MAC_ADDR_LENGTH];
   WiFi.macAddress(mac);
-  int name_len = snprintf(NULL, 0, "%s_%02X%02X%02X", name.value.string_value, mac[3], mac[4], mac[5]);
+  int name_len = snprintf(NULL, 0, "%s_%02X%02X%02X", ch_ac_name.value.string_value, mac[3], mac[4], mac[5]);
   char *name_value = (char*)malloc(name_len + 1);
-  snprintf(name_value, name_len + 1, "%s_%02X%02X%02X", name.value.string_value, mac[3], mac[4], mac[5]);
-  name.value = HOMEKIT_STRING_CPP(name_value);
+  snprintf(name_value, name_len + 1, "%s_%02X%02X%02X", ch_ac_name.value.string_value, mac[3], mac[4], mac[5]);
+  ch_ac_name.value = HOMEKIT_STRING_CPP(name_value);
 
   arduino_homekit_setup(&config);
 

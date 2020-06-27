@@ -1,5 +1,10 @@
 {
     "files.associations": {
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "numeric": "c",
+        "fstream": "c",
+        "iostream": "c",
+        "istream": "c",
+        "ostream": "c"
     }
 }
