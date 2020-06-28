@@ -48,11 +48,13 @@ extern "C" bool is_ac_on() {
 
 extern "C" void set_ac_on(bool is_on) {
   if (is_on) {
-    ac.on();
     printf("[AC] Turning ON.\n");
+    ac.on();
   } else {
-    ac.off();
-    printf("[AC] Turning OFF.\n");
+    if (ac.getMode() != kCoolixFan) {
+      printf("[AC] Turning OFF.\n");
+      ac.off();
+    }
   }
   set_needs_ir();
 }
@@ -71,7 +73,7 @@ extern "C" uint8_t get_current_hc_state() {
       return 2;
     
     default:
-      return 1; // "idle", since dry and auto modes don't map onto HomeKit's heater/cooler state.
+      return 1; // "idle", since dry, fan and auto modes don't map onto HomeKit's heater/cooler state.
     }
 }
 
@@ -99,12 +101,25 @@ extern "C" void set_target_hc_state(uint8_t state) {
 }
 
 extern "C" void set_threshold(float t) {
+  printf("[AC] Set threshold = %f\n", t);
   ac.setTemp((uint8_t)t);
   set_needs_ir();
 }
 
 extern "C" float get_threshold() {
   return ac.getTemp();
+}
+
+extern "C" void set_fan_on(bool is_on) {
+  if (is_on) {
+    ac.setMode(kCoolixFan);
+    ac.on();
+  } else {
+    if (ac.getMode() == kCoolixFan) {
+      ac.off();
+    }
+  }
+  set_needs_ir();
 }
 
 unsigned long prev_time = ULONG_MAX;

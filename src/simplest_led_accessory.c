@@ -29,8 +29,7 @@ extern void set_ac_on(bool on);
 extern uint8_t get_current_hc_state();
 extern void set_target_hc_state(uint8_t state);
 extern void set_threshold(float t);
-
-extern void fan_on();
+extern void set_fan_on(bool is_on);
 
 
 homekit_value_t ac_active_get() {
@@ -56,8 +55,6 @@ void target_hc_state_set(homekit_value_t value) {
 	set_target_hc_state(_target_hc_state);
 }
 
-
-void on_fan_update();
 
 extern float temperature;
 
@@ -86,19 +83,12 @@ void update_threshold() {
 
 
 // fan
+void on_fan_update();
+
 homekit_characteristic_t ch_fan_active = HOMEKIT_CHARACTERISTIC_(ACTIVE, 0, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_fan_update));
 
 void on_fan_update() {
-	// printf("-- on_fan_update()\n");
-	// if (ch_fan_active.value.uint8_value == 0 && ch_current_hc_state.value.uint8_value == 0) {
-	// 	printf("Both fan and cooler are off, turning off the unit.\n");
-	// 	ac_off();
-	// } else {
-	// 	printf("Turning on the fan (and turning off the cooler).\n");
-	// 	fan_on();
-	// 	ch_current_hc_state.value.uint8_value = 0;
-	// 	homekit_characteristic_notify(&ch_current_hc_state, ch_current_hc_state.value);
-	// }
+	set_fan_on(ch_fan_active.value.uint8_value != 0);
 }
 
 void accessory_identify(homekit_value_t _value) {
