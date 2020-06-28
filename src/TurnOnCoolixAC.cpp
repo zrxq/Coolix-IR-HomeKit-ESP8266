@@ -82,14 +82,17 @@ extern "C" void set_target_hc_state(uint8_t state) {
   switch (state)
   {
     case 0:
+      ac.setTemp(17);
       ac.setMode(kCoolixAuto);
     break;
 
     case 1:
+      ac.setTemp(30);
       ac.setMode(kCoolixHeat);
     break;
 
     case 2:
+    ac.setTemp(17);
       ac.setMode(kCoolixCool);
     break;    
   
@@ -97,6 +100,7 @@ extern "C" void set_target_hc_state(uint8_t state) {
       ac.setMode(kCoolixCool);
     break;
   }
+  ac.setFan(kCoolixFanMax);
   set_needs_ir();
 }
 
@@ -113,6 +117,7 @@ extern "C" float get_threshold() {
 extern "C" void set_fan_on(bool is_on) {
   if (is_on) {
     ac.setMode(kCoolixFan);
+    ac.setFan(kCoolixFanMax);
     ac.on();
   } else {
     if (ac.getMode() == kCoolixFan) {

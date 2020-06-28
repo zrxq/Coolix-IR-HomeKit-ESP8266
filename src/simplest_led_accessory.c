@@ -72,9 +72,9 @@ homekit_characteristic_t ch_temperature = HOMEKIT_CHARACTERISTIC_(CURRENT_TEMPER
 homekit_characteristic_t ch_current_hc_state = HOMEKIT_CHARACTERISTIC_(CURRENT_HEATER_COOLER_STATE, 0, .getter=current_hc_state);
 homekit_characteristic_t ch_target_hc_state = HOMEKIT_CHARACTERISTIC_(TARGET_HEATER_COOLER_STATE, 2, 
 																	.getter=target_hc_state, .setter=target_hc_state_set);
-homekit_characteristic_t ch_cooling_threshold = HOMEKIT_CHARACTERISTIC_(COOLING_THRESHOLD_TEMPERATURE, 25.f, 
+homekit_characteristic_t ch_cooling_threshold = HOMEKIT_CHARACTERISTIC_(COOLING_THRESHOLD_TEMPERATURE, 17.f, 
 																.callback=HOMEKIT_CHARACTERISTIC_CALLBACK(update_threshold));
-homekit_characteristic_t ch_heating_threshold = HOMEKIT_CHARACTERISTIC_(HEATING_THRESHOLD_TEMPERATURE, 25.f, 
+homekit_characteristic_t ch_heating_threshold = HOMEKIT_CHARACTERISTIC_(HEATING_THRESHOLD_TEMPERATURE, 30.f, 
 																.callback=HOMEKIT_CHARACTERISTIC_CALLBACK(update_threshold));
 
 void update_threshold() {
@@ -88,7 +88,11 @@ void on_fan_update();
 homekit_characteristic_t ch_fan_active = HOMEKIT_CHARACTERISTIC_(ACTIVE, 0, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_fan_update));
 
 void on_fan_update() {
-	set_fan_on(ch_fan_active.value.uint8_value != 0);
+	bool fan_on = ch_fan_active.value.uint8_value != 0;
+	set_fan_on(fan_on);
+	if (fan_on) {
+		homekit_characteristic_notify(&ch_current_hc_state, HOMEKIT_UINT8(get_current_hc_state()));
+	}
 }
 
 void accessory_identify(homekit_value_t _value) {
