@@ -71,16 +71,14 @@ homekit_characteristic_t ch_ac_active = HOMEKIT_CHARACTERISTIC_(ACTIVE, 0, .gett
 homekit_characteristic_t ch_temperature = HOMEKIT_CHARACTERISTIC_(CURRENT_TEMPERATURE, 0, .getter=get_temperature);
 homekit_characteristic_t ch_current_hc_state = HOMEKIT_CHARACTERISTIC_(CURRENT_HEATER_COOLER_STATE, 0, .getter=current_hc_state);
 homekit_characteristic_t ch_target_hc_state = HOMEKIT_CHARACTERISTIC_(TARGET_HEATER_COOLER_STATE, 2, 
-																	.getter=target_hc_state, .setter=target_hc_state_set);
-homekit_characteristic_t ch_cooling_threshold = HOMEKIT_CHARACTERISTIC_(COOLING_THRESHOLD_TEMPERATURE, 17.f, 
-																.callback=HOMEKIT_CHARACTERISTIC_CALLBACK(update_threshold));
-homekit_characteristic_t ch_heating_threshold = HOMEKIT_CHARACTERISTIC_(HEATING_THRESHOLD_TEMPERATURE, 30.f, 
+																	.getter=target_hc_state, .setter=target_hc_state_set,
+																	.valid_values={.count=1, .values=(uint8_t[]) {2}});
+homekit_characteristic_t ch_cooling_threshold = HOMEKIT_CHARACTERISTIC_(COOLING_THRESHOLD_TEMPERATURE, 25.f, 
 																.callback=HOMEKIT_CHARACTERISTIC_CALLBACK(update_threshold));
 
 void update_threshold() {
 	set_threshold(ch_cooling_threshold.value.float_value);
 }
-
 
 // fan
 void on_fan_update();
@@ -128,7 +126,6 @@ homekit_accessory_t *accessories[] =
 							&ch_current_hc_state,
 							&ch_target_hc_state,
 							&ch_cooling_threshold,
-							// &ch_heating_threshold,
 						    NULL
 						  }),
 						  HOMEKIT_SERVICE(FAN, .primary=false,
@@ -147,4 +144,5 @@ homekit_server_config_t config = {
 };
 
 void accessory_init() {
+	set_ac_on(false);
 }

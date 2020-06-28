@@ -42,7 +42,6 @@ extern "C" void ac_setup() {
 
 extern "C" bool is_ac_on() {
   printf("[AC] Get power = \%d\n", ac.getPower());
-  set_needs_ir();
   return ac.getPower();
 }
 
@@ -79,32 +78,30 @@ extern "C" uint8_t get_current_hc_state() {
 
 extern "C" void set_target_hc_state(uint8_t state) {
   printf("[AC] Set state = %d.\n", state);
+  if (state == ac.getMode()) {
+    printf("Same state, ignoring.\n");
+    return;
+  }
   switch (state)
   {
-    case 0:
-      ac.setTemp(17);
-      ac.setMode(kCoolixAuto);
-    break;
-
-    case 1:
-      ac.setTemp(30);
-      ac.setMode(kCoolixHeat);
-    break;
-
     case 2:
-    ac.setTemp(17);
+      ac.on();
       ac.setMode(kCoolixCool);
+      ac.setFan(kCoolixFanMax);
+      ac.setSwing();
     break;    
   
-  default:
-      ac.setMode(kCoolixCool);
+    default:
     break;
   }
-  ac.setFan(kCoolixFanMax);
   set_needs_ir();
 }
 
 extern "C" void set_threshold(float t) {
+  if ((int)t == ac.getTemp()) {
+    printf("Same temperature, ignoring.\n");
+    return;
+  }
   printf("[AC] Set threshold = %f\n", t);
   ac.setTemp((uint8_t)t);
   set_needs_ir();
@@ -115,6 +112,10 @@ extern "C" float get_threshold() {
 }
 
 extern "C" void set_fan_on(bool is_on) {
+  if (is_on == (ac.getMode() == kCoolixFan)) {
+    printf("Same fan state, ignoring.\n");
+    return;
+  }
   if (is_on) {
     ac.setMode(kCoolixFan);
     ac.setFan(kCoolixFanMax);
@@ -136,6 +137,7 @@ extern "C" void update_ac() {
   unsigned long time = millis();
   if (ir_dirty_since != ULONG_MAX && (time - ir_dirty_since > ir_debounce || prev_time > time)) {
     ac.send();
+    printf("Sending,\n");
     ir_dirty_since = ULONG_MAX;
   }
   prev_time = time;
@@ -143,11 +145,4 @@ extern "C" void update_ac() {
 
 void set_needs_ir() {
   ir_dirty_since = millis();
-}
-
-extern "C" void fan_on() {
-  ac.on();
-  ac.setMode(kCoolixFan);  
-  ac.setFan(kCoolixFanMax);
-  ac.send();
 }
