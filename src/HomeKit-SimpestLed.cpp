@@ -134,8 +134,11 @@ void homekit_setup() {
 
 }
 
+extern "C" void update_ac();
+
 void homekit_loop() {
   arduino_homekit_loop();
+  update_ac();
   uint32_t time = millis();
   if (time > next_heap_millis) {
     INFO("heap: %d, sockets: %d", ESP.getFreeHeap(), arduino_homekit_connected_clients_count());

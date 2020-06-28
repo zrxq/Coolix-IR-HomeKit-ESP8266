@@ -27,9 +27,12 @@
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
 #include <ir_Coolix.h>
+#include <limits.h>
 
 const uint16_t kIrLed = 4;  // ESP8266 GPIO pin to use. Recommended: 4 (D2).
 IRCoolixAC ac(kIrLed);      // Set the GPIO to be used for sending messages.
+
+void set_needs_ir();
 
 extern "C" void ac_setup() {
   Serial.println("Starting Coolix A/C");
@@ -37,23 +40,94 @@ extern "C" void ac_setup() {
   ac.begin();
 }
 
-extern "C" void ac_on(float temp, float fan_speed_pc) {
-  Serial.println("Turning ON");
-  ac.on();
-  ac.setMode(kCoolixCool);
-  ac.setTemp((int)temp);  
-  ac.send();
+extern "C" bool is_ac_on() {
+  printf("[AC] Get power = \%d\n", ac.getPower());
+  set_needs_ir();
+  return ac.getPower();
+}
+
+extern "C" void set_ac_on(bool is_on) {
+  if (is_on) {
+    ac.on();
+    printf("[AC] Turning ON.\n");
+  } else {
+    ac.off();
+    printf("[AC] Turning OFF.\n");
+  }
+  set_needs_ir();
+}
+
+extern "C" uint8_t get_current_hc_state() {
+    if (!ac.getPower()) {
+      return 0;
+    }
+    uint8_t mode = ac.getMode();
+    switch (mode)
+    {
+    case kCoolixCool:
+      return 3;
+
+    case kCoolixHeat:
+      return 2;
+    
+    default:
+      return 1; // "idle", since dry and auto modes don't map onto HomeKit's heater/cooler state.
+    }
+}
+
+extern "C" void set_target_hc_state(uint8_t state) {
+  printf("[AC] Set state = %d.\n", state);
+  switch (state)
+  {
+    case 0:
+      ac.setMode(kCoolixAuto);
+    break;
+
+    case 1:
+      ac.setMode(kCoolixHeat);
+    break;
+
+    case 2:
+      ac.setMode(kCoolixCool);
+    break;    
+  
+  default:
+      ac.setMode(kCoolixCool);
+    break;
+  }
+  set_needs_ir();
+}
+
+extern "C" void set_threshold(float t) {
+  ac.setTemp((uint8_t)t);
+  set_needs_ir();
+}
+
+extern "C" float get_threshold() {
+  return ac.getTemp();
+}
+
+unsigned long prev_time = ULONG_MAX;
+
+unsigned long ir_dirty_since = ULONG_MAX;
+const unsigned long ir_debounce = 300;
+
+extern "C" void update_ac() {
+  unsigned long time = millis();
+  if (ir_dirty_since != ULONG_MAX && (time - ir_dirty_since > ir_debounce || prev_time > time)) {
+    ac.send();
+    ir_dirty_since = ULONG_MAX;
+  }
+  prev_time = time;
+}
+
+void set_needs_ir() {
+  ir_dirty_since = millis();
 }
 
 extern "C" void fan_on() {
   ac.on();
   ac.setMode(kCoolixFan);  
   ac.setFan(kCoolixFanMax);
-  ac.send();
-}
-
-extern "C" void ac_off() {
-  Serial.println("Turning OFF");
-  ac.off();
   ac.send();
 }
