@@ -17,7 +17,7 @@
 
 //const char * buildTime = __DATE__ " " __TIME__ " GMT";
 
-#define ACCESSORY_NAME  ("Кондиционер")
+#define ACCESSORY_NAME  ("A/C IR Remote")
 #define ACCESSORY_SN  ("SN_8362459")  //SERIAL_NUMBER
 #define ACCESSORY_MANUFACTURER ("zrslv")
 #define ACCESSORY_MODEL  ("ESP8266-COOLIX")
@@ -129,7 +129,6 @@ homekit_accessory_t *accessories[] =
 						  }),
 						  HOMEKIT_SERVICE(HEATER_COOLER, .primary=true,
 						  .characteristics=(homekit_characteristic_t*[]){
-						    HOMEKIT_CHARACTERISTIC(NAME, "Кондиционер"),
 						    &ch_ac_active,
 							&ch_temperature,
 							&ch_current_hc_state,
@@ -140,7 +139,6 @@ homekit_accessory_t *accessories[] =
 						  }),
 						  HOMEKIT_SERVICE(FAN, .primary=false,
 						  .characteristics=(homekit_characteristic_t*[]){
-							HOMEKIT_CHARACTERISTIC(NAME, "Проветривание"),
 						    &ch_fan_active,
 						    NULL
 						  }),
