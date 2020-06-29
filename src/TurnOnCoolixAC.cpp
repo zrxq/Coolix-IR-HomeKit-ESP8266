@@ -87,8 +87,9 @@ extern "C" void set_target_hc_state(uint8_t state) {
     case 2:
       ac.on();
       ac.setMode(kCoolixCool);
-      ac.setFan(kCoolixFanMax);
-      ac.setSwing();
+      ac.setFan(2);
+      ac.setTemp(17);
+      ac.setSensorTemp(kCoolixFanMax);
     break;    
   
     default:
@@ -119,6 +120,7 @@ extern "C" void set_fan_on(bool is_on) {
   if (is_on) {
     ac.setMode(kCoolixFan);
     ac.setFan(kCoolixFanMax);
+    ac.setSwing();
     ac.on();
   } else {
     if (ac.getMode() == kCoolixFan) {
