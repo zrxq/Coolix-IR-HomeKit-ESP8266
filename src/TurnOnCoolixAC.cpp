@@ -109,7 +109,9 @@ extern "C" void set_threshold(float t) {
 }
 
 extern "C" float get_threshold() {
-  return ac.getTemp();
+  int temp = ac.getTemp();
+  printf("Get threshold (=%d).\n", temp);
+  return temp;
 }
 
 extern "C" void set_fan_on(bool is_on) {
@@ -139,7 +141,8 @@ extern "C" void update_ac() {
   unsigned long time = millis();
   if (ir_dirty_since != ULONG_MAX && (time - ir_dirty_since > ir_debounce || prev_time > time)) {
     ac.send();
-    printf("Sending,\n");
+    printf("Current state: %s\n", ac.toString().c_str());
+    printf("Sending IR.\n");
     ir_dirty_since = ULONG_MAX;
   }
   prev_time = time;
