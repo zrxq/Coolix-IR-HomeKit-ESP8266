@@ -135,7 +135,7 @@ extern "C" void set_fan_on(bool is_on) {
 unsigned long prev_time = ULONG_MAX;
 
 unsigned long ir_dirty_since = ULONG_MAX;
-const unsigned long ir_debounce = 300;
+const unsigned long ir_debounce = 500;
 
 extern "C" void update_ac() {
   unsigned long time = millis();
