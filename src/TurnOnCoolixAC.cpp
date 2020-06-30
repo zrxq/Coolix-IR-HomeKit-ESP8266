@@ -45,14 +45,35 @@ extern "C" bool is_ac_on() {
   return ac.getPower();
 }
 
+extern "C" void set_fan_on(bool);
+extern "C" void set_target_hc_state(uint8_t state);
+
 extern "C" void set_ac_on(bool is_on) {
   if (is_on) {
     printf("[AC] Turning ON.\n");
     ac.on();
-  } else {
     if (ac.getMode() != kCoolixFan) {
+        printf("Setting mode to COOLING.\n");
+        ac.on();
+        ac.setMode(kCoolixCool);
+        ac.setTemp(17);
+        ac.setFan(kCoolixFanMax, false);
+    } else {
+        printf("Setting mode to FAN.\n");
+      set_fan_on(true);
+    }
+  } else {
+    if (ac.getMode() != kCoolixFan && ac.getPower()) {
       printf("[AC] Turning OFF.\n");
       ac.off();
+    } else {
+      if (ac.getPower()) {
+        printf("Got OFF, but the fan is still working.\n");
+        return;
+      } else {
+        printf("Ignoring OFF, already OFF.\n");
+        return;
+      }
     }
   }
   set_needs_ir();
@@ -85,11 +106,6 @@ extern "C" void set_target_hc_state(uint8_t state) {
   switch (state)
   {
     case 2:
-      ac.on();
-      ac.setMode(kCoolixCool);
-      ac.setFan(2);
-      ac.setTemp(17);
-      ac.setSensorTemp(kCoolixFanMax);
     break;    
   
     default:
@@ -114,21 +130,18 @@ extern "C" float get_threshold() {
   return temp;
 }
 
-extern "C" void set_fan_on(bool is_on) {
-  if (is_on == (ac.getMode() == kCoolixFan)) {
-    printf("Same fan state, ignoring.\n");
-    return;
-  }
-  if (is_on) {
+extern "C" void set_fan_on(bool fan_on) {
+  if (fan_on) {
     ac.setMode(kCoolixFan);
     ac.setFan(kCoolixFanMax);
-    ac.setSwing();
     ac.on();
   } else {
     if (ac.getMode() == kCoolixFan) {
       ac.off();
+    } else {
+      set_ac_on(true);
     }
-  }
+  } 
   set_needs_ir();
 }
 
