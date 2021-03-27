@@ -73,8 +73,8 @@ homekit_characteristic_t ch_temperature = HOMEKIT_CHARACTERISTIC_(CURRENT_TEMPER
 homekit_characteristic_t ch_current_hc_state = HOMEKIT_CHARACTERISTIC_(CURRENT_HEATER_COOLER_STATE, 0, .getter=current_hc_state);
 homekit_characteristic_t ch_target_hc_state = HOMEKIT_CHARACTERISTIC_(TARGET_HEATER_COOLER_STATE, 0, 
 																	.getter=target_hc_state, .setter=target_hc_state_set,
-																	.valid_values={.count=2, .values=(uint8_t[]) {0, 1, 2}});
-homekit_characteristic_t ch_cooling_threshold = HOMEKIT_CHARACTERISTIC_(COOLING_THRESHOLD_TEMPERATURE, 31.f, 
+																	.valid_values={.count=2, .values=(uint8_t[]) {1, 2}});
+homekit_characteristic_t ch_cooling_threshold = HOMEKIT_CHARACTERISTIC_(COOLING_THRESHOLD_TEMPERATURE, 25.f, 
 																.callback=HOMEKIT_CHARACTERISTIC_CALLBACK(update_threshold));
 homekit_characteristic_t ch_heating_threshold = HOMEKIT_CHARACTERISTIC_(HEATING_THRESHOLD_TEMPERATURE, 31.f, 
 																.callback=HOMEKIT_CHARACTERISTIC_CALLBACK(update_threshold));
