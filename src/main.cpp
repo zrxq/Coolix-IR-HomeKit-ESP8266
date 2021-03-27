@@ -1,16 +1,3 @@
-/*
-   simple_led.ino
-
-   This accessory contains a builtin-led on ESP8266
-   Setup code: 111-11-111
-   The Flash-Button(D3, GPIO0) on NodeMCU:
-
-    Created on: 2020-02-08
-        Author: Mixiaoxiao (Wang Bin)
-    Edited on: 2020-03-01
-        Edited by: euler271 (Jonas Linn)
-*/
-
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <DallasTemperature.h>
