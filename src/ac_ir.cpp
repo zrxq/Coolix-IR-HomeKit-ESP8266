@@ -12,7 +12,7 @@ void set_needs_ir();
 
 void ac_reset() {
   ac.next.protocol = decode_type_t::TCL112AC;  // Set a protocol to use.
-  ac.next.mode = stdAc::opmode_t::kCool;  // Run in cool mode initially.
+  ac.next.mode = stdAc::opmode_t::kHeat;  // Run in cool mode initially.
   ac.next.celsius = true;  // Use Celsius for temp units. False = Fahrenheit
   ac.next.degrees = 25;  // 25 degrees.
   ac.next.fanspeed = stdAc::fanspeed_t::kMax;  // Start the fan at medium.
@@ -53,21 +53,27 @@ extern "C" void set_ac_on(bool is_on) {
 }
 
 extern "C" uint8_t get_current_hc_state() {
+    uint8_t s;
     if (!ac.getState().power) {
-      return 0;
-    }
-    stdAc::opmode_t mode = ac.getState().mode;
-    switch (mode)
+      s = 0;
+    } else 
     {
-    case stdAc::opmode_t::kCool:
-      return 1;
+      stdAc::opmode_t mode = ac.getState().mode;
+      switch (mode)
+      {
+      case stdAc::opmode_t::kHeat:
+        s = 2; // NOTE: The constants have different meaning from target H/C state constants.
 
-    case stdAc::opmode_t::kHeat:
-      return 2;
-    
-    default:
-      return 0; // "auto", since dry, fan etc modes don't map onto HomeKit's heater/cooler state.
+      case stdAc::opmode_t::kCool:
+        s = 3;
+      
+      default:
+        s = 1; // "idle", since dry, fan etc modes don't map onto HomeKit's heater/cooler state.
+      }
     }
+
+    printf("Get current H/C state (%d)\n", s);
+    return s;
 }
 
 extern "C" void set_target_hc_state(uint8_t state) {
