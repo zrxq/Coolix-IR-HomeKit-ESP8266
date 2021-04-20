@@ -3,12 +3,8 @@
 #include <DallasTemperature.h>
 
 #include <arduino_homekit_server.h>
-#include "wifi.h" // Just create an empty file (or put your ssid and password there)
+#include <WiFiManager.h>
 
-#ifndef APN_SETTINGS 
-const char *ssid = "apn name";
-const char *password = "apn password";
-#endif
 
 #define PL(s) Serial.println(s)
 #define P(s) Serial.print(s)
@@ -39,7 +35,7 @@ void homekit_setup();
 void homekit_loop();
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(115200); while (!Serial); delay(200);
   Serial.setRxBufferSize(32);
   Serial.setDebugOutput(false);
 
@@ -51,16 +47,16 @@ void setup() {
   WiFi.persistent(false);
   WiFi.disconnect(false);
   WiFi.setAutoReconnect(true);
-  WiFi.begin(ssid, password);
 
-  Serial.println("WiFi connecting...");
-
-  while (!WiFi.isConnected()) {
-    delay(100);
-    Serial.print(".");
-  }
-  Serial.print("\n");
-  Serial.printf("WiFi connected, IP: %s\n", WiFi.localIP().toString().c_str());
+    WiFiManager wm;
+    bool wifi_okay = wm.autoConnect();
+    if (wifi_okay) { 
+        Serial.print("\n");
+        Serial.printf("WiFi connected, IP: %s\n", WiFi.localIP().toString().c_str());
+    } else {
+        Serial.println("WiFi failed, restarting.");
+        ESP.restart();
+    }
 
   printf("\n");
   printf("SketchSize: %d B\n", ESP.getSketchSize());
